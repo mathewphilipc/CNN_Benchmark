@@ -27,7 +27,7 @@ IMG_WIDTH = 64 # original size = 256
 CHANNELS = 3 # we have full-color images
 
 
-TRAIN_FRAC = 0.95
+TRAIN_FRAC = 0.90
 
 # Test random number generation
 np.random.rand()
@@ -44,12 +44,13 @@ np.random.rand()
 
 
 
+#def get_batches(train_image, train_label, batch_size):
+#	X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_size,
+#		capacity=batch_size * 8, num_threads=4)
+#	return X_train, Y_train
 
-
-
-
-
-
+#total_test_count = 0;
+#total_train_count = 0;
 
 
 
@@ -68,6 +69,7 @@ def read_images(dataset_path, mode, batch_size):
             train_labels.append(int(d.split(' ')[1]))
             test_labels.append(int(d.split(' ')[1]))
     elif mode == 'folder':
+    	# Count how many (image, label) pairs go into testing vs training
     	total_test_count = 0;
     	total_train_count = 0;
         # An ID will be affected to each sub-folders by alphabetical order
@@ -107,34 +109,48 @@ def read_images(dataset_path, mode, batch_size):
     else:
         raise Exception("Unknown mode.")
 
-    print("Total training images: %d" % total_train_count)
-    print("Total testing images: %d" % total_test_count)
-    portion = 100.0*(total_train_count + 0.0) / (total_train_count + total_test_count + 0.0)
-    print("Portion used for training: %f " % portion)
+#    print("\n\n****************************************")
+#    print("Total training images: %d" % total_train_count)
+#    print("Total testing images: %d" % total_test_count)
+#    portion = 100.0*(total_train_count + 0.0) / (total_train_count + total_test_count + 0.0)
+#    print("Portion used for training: %f " % portion)
+#    print("****************************************\n\n")
 
     # Convert to Tensor
     train_imagepaths = tf.convert_to_tensor(train_imagepaths, dtype=tf.string)
     train_labels = tf.convert_to_tensor(train_labels, dtype=tf.int32)
+    test_imagepaths = tf.convert_to_tensor(test_imagepaths, dtype=tf.string)
+    test_labels = tf.convert_to_tensor(test_labels, dtype=tf.int32)
     # Build a TF Queue, shuffle data
     train_image, train_label = tf.train.slice_input_producer([train_imagepaths, train_labels],
+                                                 shuffle=True)
+    test_image, test_label = tf.train.slice_input_producer([test_imagepaths, test_labels],
                                                  shuffle=True)
 
     # Read images from disk
     train_image = tf.read_file(train_image)
     train_image = tf.image.decode_jpeg(train_image, channels=CHANNELS)
+    test_image = tf.read_file(test_image)
+    test_image = tf.image.decode_jpeg(test_image, channels=CHANNELS)
 
     # Resize images to a common size
     train_image = tf.image.resize_images(train_image, [IMG_HEIGHT, IMG_WIDTH])
+    test_image = tf.image.resize_images(test_image, [IMG_HEIGHT, IMG_WIDTH])
 
     # Normalize
     train_image = train_image * 1.0/127.5 - 1.0
+    test_image = test_image * 1.0/127.5 - 1.0
 
     # Create batches
-    X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_size,
-                          capacity=batch_size * 8,
-                          num_threads=4)
 
-    return X_train, Y_train
+    print("\nFound all images and labels in NWPU-RESISC45...\n")
+
+    return train_image, test_image, train_label, test_label, total_train_count, total_test_count
+
+#    X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_size,
+#                          capacity=batch_size * 8,
+#                          num_threads=4)
+
 
 
 
@@ -159,14 +175,26 @@ def read_images(dataset_path, mode, batch_size):
 
 # Set hyperparameters
 
-learning_rate = 0.001
-num_steps = 100
-batch_size = 500
+learning_rate = 0.0001
+num_steps = 1000
+batch_size = 1000
 display_step = 1
 dropout = 0.5
 
 # Build the data input
-X_train, Y_train = read_images(DATASET_PATH, MODE, batch_size)
+#X_train, Y_train = read_images(DATASET_PATH, MODE, batch_size)
+
+train_image, test_image, train_label, test_label, total_train_count, total_test_count = read_images(DATASET_PATH, MODE, batch_size)
+
+X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_size,
+	capacity=batch_size * 8, num_threads=4)
+
+# Use entire testing set for every accuracy check
+X_test, Y_test = tf.train.batch([train_image, train_label], batch_size=total_test_count,
+	capacity=batch_size * 8, num_threads=4)
+
+
+print("\nDone randomly selecting %d training images and %d test images\n" % (total_train_count, total_test_count))
 
 def conv_net(x, n_classes, dropout, reuse, is_training):
     with tf.variable_scope('ConvNet', reuse=reuse):
