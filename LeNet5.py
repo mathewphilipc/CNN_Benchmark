@@ -30,7 +30,7 @@ CHANNELS = 3 # we have full-color images
 TRAIN_FRAC = 0.90
 
 # Test random number generation
-np.random.rand()
+# np.random.rand()
 #print("\n\n\n Random number time \n\n\n")
 #testRand = np.random.rand()
 #print("\n\n\n %f \n\n\n" % testRand)
@@ -175,8 +175,8 @@ def read_images(dataset_path, mode, batch_size):
 
 # Set hyperparameters
 
-learning_rate = 0.0001
-num_steps = 1000
+learning_rate = 0.001
+num_steps = 100000
 batch_size = 1000
 display_step = 1
 dropout = 0.5
@@ -243,15 +243,18 @@ def conv_net(x, n_classes, dropout, reuse, is_training):
     return out
 
 logits_train = conv_net(X_train, N_CLASSES, dropout, reuse=False, is_training=True)
-logits_test = conv_net(X_train, N_CLASSES, dropout, reuse=True, is_training=False)
+logits_test = conv_net(X_test, N_CLASSES, dropout, reuse=True, is_training=False)
 
 loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
 	logits=logits_train, labels=Y_train))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 train_op = optimizer.minimize(loss_op)
 
-correct_pred = tf.equal(tf.argmax(logits_test, 1), tf.cast(Y_train, tf.int64))
-accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+correct_test_pred = tf.equal(tf.argmax(logits_test, 1), tf.cast(Y_test, tf.int64))
+test_accuracy = tf.reduce_mean(tf.cast(correct_test_pred, tf.float32))
+
+correct_train_pred = tf.equal(tf.argmax(logits_train, 1), tf.cast(Y_train, tf.int64))
+train_accuracy = tf.reduce_mean(tf.cast(correct_train_pred, tf.float32))
 
 
 
@@ -274,10 +277,11 @@ with tf.Session() as sess:
 
         if step % display_step == 0:
             # Run optimization and calculate batch loss and accuracy
-            _, loss, acc = sess.run([train_op, loss_op, accuracy])
+            _, loss, test_acc, train_acc = sess.run([train_op, loss_op, test_accuracy, train_accuracy])
             print("Step " + str(step) + ", Minibatch Loss= " + \
-                  "{:.4f}".format(loss) + ", Training Accuracy= " + \
-                  "{:.3f}".format(acc))
+                  "{:.4f}".format(loss) + ", Train Set Accuracy= " + \
+                  "{:.3f}".format(train_acc) + ", Test Set Accuracy = " + \
+                  "{:.3f}".format(test_acc))
         else:
             # Only run the optimization op (backprop)
             sess.run(train_op)
