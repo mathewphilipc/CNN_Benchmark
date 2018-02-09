@@ -279,8 +279,8 @@ with tf.Session() as sess:
             # Run optimization and calculate batch loss and accuracy
             _, loss, test_acc, train_acc = sess.run([train_op, loss_op, test_accuracy, train_accuracy])
             print("Step " + str(step) + ", Minibatch Loss= " + \
-                  "{:.4f}".format(loss) + ", Train Set Accuracy= " + \
-                  "{:.3f}".format(train_acc) + ", Test Set Accuracy = " + \
+                  "{:.4f}".format(loss) + ", Train Acc " + \
+                  "{:.3f}".format(train_acc) + ", Test Acc = " + \
                   "{:.3f}".format(test_acc))
         else:
             # Only run the optimization op (backprop)
