@@ -190,7 +190,7 @@ X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_s
 	capacity=batch_size * 8, num_threads=4)
 
 # Use entire testing set for every accuracy check
-X_test, Y_test = tf.train.batch([train_image, train_label], batch_size=total_test_count,
+X_test, Y_test = tf.train.batch([test_image, test_label], batch_size=total_test_count,
 	capacity=batch_size * 8, num_threads=4)
 
 
