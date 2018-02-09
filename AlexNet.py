@@ -177,7 +177,7 @@ def read_images(dataset_path, mode, batch_size):
 
 learning_rate = 0.001
 num_steps = 100000
-batch_size = 1000
+batch_size = 3
 display_step = 1
 dropout = 0.5
 
@@ -200,43 +200,64 @@ def conv_net(x, n_classes, dropout, reuse, is_training):
     with tf.variable_scope('ConvNet', reuse=reuse):
         conv1 = tf.layers.conv2d(
             inputs = x,
-            filters = 6,
-            kernel_size = 5,
-            strides = 1,
-            padding = "valid",
-            activation=tf.tanh)
+            filters = 96, # previous: filters = 32
+            kernel_size = [11, 11],
+            strides = (4,4),
+            padding = "same",
+            activation=tf.nn.relu)
+            # Input Tensor Shape: [batch_size, 32, 32, 1]
+            # Output Tensor Shape: [batch_size, 32, 32, 96]
 
-        pool2 = tf.layers.average_pooling2d(
+        pool2 = tf.layers.max_pooling2d(
             inputs = conv1,
-            pool_size = 2,
+            pool_size = 3,
             strides = 2)
+            # Input Tensor Shape: [batch_size, 32, 32, 32]
+            # Output Tensor Shape: [batch_size, 16, 16, 32]
 
         conv3 = tf.layers.conv2d(
-            inputs = pool2,
-            filters = 16,
-            kernel_size = 5,
-            strides = 1,
-            padding = "valid",
-            activation=tf.tanh)
+        inputs = pool2,
+        filters = 256,
+        kernel_size = [5, 5],
+        padding="same",
+        activation=tf.nn.relu)
+        # Input Tensor Shape: [batch_size, 16, 16, 32]
+        # Output Tensor Shape: [batch_size, 16, 16, 64]
 
 
-        pool4 = tf.layers.average_pooling2d(
+        pool4 = tf.layers.max_pooling2d(
             inputs = conv3,
-            pool_size = 2,
+            pool_size = [3, 3],
             strides = 2)
+        # ;lkajsdf
 
         conv5 = tf.layers.conv2d(
             inputs = pool4,
-            filters = 120,
+            filters = 384,
             kernel_size = 3,
             padding = "same",
             activation = tf.nn.relu)
 
-        flattened = tf.contrib.layers.flatten(conv5)
+        conv6 = tf.layers.conv2d(
+            inputs = conv5,
+            filters = 384,
+            kernel_size = 3,
+            padding="same",
+            activation = tf.nn.relu)
 
-        fc9 = tf.layers.dense(flattened, 84)
+        conv7 = tf.layers.conv2d(
+            inputs = conv6,
+            filters = 384,
+            kernel_size = 3,
+            padding="same",
+            activation = tf.nn.relu)
+
+
+        flattened = tf.contrib.layers.flatten(conv7)
+
+        fc9 = tf.layers.dense(flattened, 1024)
         fc9 = tf.layers.dropout(fc9, rate=dropout, training=is_training)
-        fc10 = tf.layers.dense(fc9, 10)
+        fc10 = tf.layers.dense(fc9, 1024)
         fc10 = tf.layers.dropout(fc9, rate=dropout, training=is_training)
         out = tf.layers.dense(fc10, n_classes)
         out = tf.nn.softmax(out) if not is_training else out
