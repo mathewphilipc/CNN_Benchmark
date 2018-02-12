@@ -22,8 +22,8 @@ N_CLASSES = FULL_N_CLASSES
 
 # print(N_CLASSES)
 
-IMG_HEIGHT = 64 # original size = 256
-IMG_WIDTH = 64 # original size = 256
+IMG_HEIGHT = 16 # original size = 256
+IMG_WIDTH = 16 # original size = 256
 CHANNELS = 3 # we have full-color images
 
 
@@ -152,8 +152,8 @@ def read_images(dataset_path, mode, batch_size):
 # Set hyperparameters
 
 learning_rate = 0.001
-num_steps = 100000
-batch_size = 1000
+num_steps = 10
+batch_size = 5
 display_step = 1
 dropout = 0.5
 
