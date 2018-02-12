@@ -22,36 +22,12 @@ N_CLASSES = FULL_N_CLASSES
 
 # print(N_CLASSES)
 
-IMG_HEIGHT = 64 # original size = 256
-IMG_WIDTH = 64 # original size = 256
+IMG_HEIGHT = 32 # original size = 256
+IMG_WIDTH = 32 # original size = 256
 CHANNELS = 3 # we have full-color images
 
 
 TRAIN_FRAC = 0.90
-
-# Test random number generation
-# np.random.rand()
-#print("\n\n\n Random number time \n\n\n")
-#testRand = np.random.rand()
-#print("\n\n\n %f \n\n\n" % testRand)
-
-
-
-
-
-
-
-
-
-
-#def get_batches(train_image, train_label, batch_size):
-#	X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_size,
-#		capacity=batch_size * 8, num_threads=4)
-#	return X_train, Y_train
-
-#total_test_count = 0;
-#total_train_count = 0;
-
 
 
 # Read dataset
