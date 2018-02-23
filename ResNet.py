@@ -32,8 +32,8 @@ N_CLASSES = FULL_N_CLASSES
 
 # print(N_CLASSES)
 
-IMG_HEIGHT = 32 # original size = 256
-IMG_WIDTH = 32 # original size = 256
+IMG_HEIGHT = 64 # original size = 256
+IMG_WIDTH = 64 # original size = 256
 CHANNELS = 3 # we have full-color images
 
 
@@ -137,11 +137,11 @@ def read_images(dataset_path, mode, batch_size):
 
 # Set hyperparameters
 
-learning_rate = 0.001
+learning_rate = 0.0003
 num_steps = 10000
 batch_size = 1000
 display_step = 1
-dropout = 0.5
+dropout = 0.0
 
 # Build the data input
 #X_train, Y_train = read_images(DATASET_PATH, MODE, batch_size)

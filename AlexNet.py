@@ -175,9 +175,9 @@ def read_images(dataset_path, mode, batch_size):
 
 # Set hyperparameters
 
-learning_rate = 0.001
+learning_rate = 0.0001
 num_steps = 100000
-batch_size = 3
+batch_size = 1000
 display_step = 1
 dropout = 0.5
 
@@ -187,11 +187,11 @@ dropout = 0.5
 train_image, test_image, train_label, test_label, total_train_count, total_test_count = read_images(DATASET_PATH, MODE, batch_size)
 
 X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_size,
-	capacity=batch_size * 8, num_threads=4)
+    capacity=batch_size * 8, num_threads=4)
 
 # Use entire testing set for every accuracy check
-X_test, Y_test = tf.train.batch([train_image, train_label], batch_size=total_test_count,
-	capacity=batch_size * 8, num_threads=4)
+X_test, Y_test = tf.train.batch([test_image, test_label], batch_size=total_test_count,
+    capacity=batch_size * 8, num_threads=4)
 
 
 print("\nDone randomly selecting %d training images and %d test images\n" % (total_train_count, total_test_count))
