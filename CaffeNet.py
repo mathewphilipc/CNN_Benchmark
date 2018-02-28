@@ -206,41 +206,41 @@ def conv_net(x, n_classes, dropout, reuse, is_training):
             padding = "same",
             activation=tf.nn.relu)
 
-        norm2 = tf.nn.local_response_normalization(
-            input = conv1,
+        pool2 = tf.layers.max_pooling2d(
+            inputs = conv1,
+            pool_size = 3,
+            strides = 2)
+
+        norm3 = tf.nn.local_response_normalization(
+            input = pool2,
             depth_radius = 2,
             bias = 1.0,
             alpha = 0.00002,
             beta = 0.75,
             name = None)
 
-        pool3 = tf.layers.max_pooling2d(
-            inputs = norm2,
-            pool_size = 3,
-            strides = 2)
-
         conv4 = tf.layers.conv2d(
-            inputs = pool3,
+            inputs = norm3,
             filters = 256,
             kernel_size = 5,
             padding="same",
             activation=tf.nn.relu)
 
-        norm5 = tf.nn.local_response_normalization(
-            input = conv4,
+        pool5 = tf.layers.max_pooling2d(
+            inputs = conv4,
+            pool_size = [3, 3],
+            strides = 2)
+
+        norm6 = tf.nn.local_response_normalization(
+            input = pool5,
             depth_radius = 2,
             bias = 1.0,
             alpha = 0.00002,
             beta = 0.75,
             name = None)
 
-        pool6 = tf.layers.max_pooling2d(
-            inputs = norm5,
-            pool_size = [3, 3],
-            strides = 2)
-
         conv7 = tf.layers.conv2d(
-            inputs = pool6,
+            inputs = norm6,
             filters = 384,
             kernel_size = 3,
             padding = "same",
@@ -319,4 +319,4 @@ with tf.Session() as sess:
 
     # Save your model
     # saver.save(sess, 'my_tf_model')
-    #saver.save(sess, '/home/mathew/models/AlexNet_model')
+    #saver.save(sess, '/home/mathew/models/CaffeNet_model')
