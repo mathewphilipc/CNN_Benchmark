@@ -1,17 +1,7 @@
-from __future__ import print_function
-
-import tensorflow as tf
-import numpy as np
-
-from keras.applications.resnet50 import ResNet50
-from keras.preprocessing import image
-from keras.applications.resnet50 import preprocess_input, decode_predictions
-
-#model = ResNet50(weights = 'imagenet')
-
 # https://github.com/aymericdamien/TensorFlow-Examples/ (cont.)
 # blob/master/examples/5_DataManagement/build_an_image_dataset.py
 
+from __future__ import print_function
 
 import tensorflow as tf
 import os
@@ -133,6 +123,10 @@ def read_images(dataset_path, mode, batch_size):
 
     return train_image, test_image, train_label, test_label, total_train_count, total_test_count
 
+#    X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_size,
+#                          capacity=batch_size * 8,
+#                          num_threads=4)
+
 
 
 # Set hyperparameters
@@ -144,7 +138,6 @@ display_step = 1
 dropout = 0.0
 
 # Build the data input
-#X_train, Y_train = read_images(DATASET_PATH, MODE, batch_size)
 
 train_image, test_image, train_label, test_label, total_train_count, total_test_count = read_images(DATASET_PATH, MODE, batch_size)
 
