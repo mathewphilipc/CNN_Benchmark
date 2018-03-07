@@ -29,28 +29,12 @@ CHANNELS = 3 # we have full-color images
 
 TRAIN_FRAC = 0.90
 
-# Test random number generation
-# np.random.rand()
-#print("\n\n\n Random number time \n\n\n")
-#testRand = np.random.rand()
-#print("\n\n\n %f \n\n\n" % testRand)
 
 
 
 
 
 
-
-
-
-
-#def get_batches(train_image, train_label, batch_size):
-#   X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_size,
-#       capacity=batch_size * 8, num_threads=4)
-#   return X_train, Y_train
-
-#total_test_count = 0;
-#total_train_count = 0;
 
 
 
@@ -109,13 +93,6 @@ def read_images(dataset_path, mode, batch_size):
     else:
         raise Exception("Unknown mode.")
 
-#    print("\n\n****************************************")
-#    print("Total training images: %d" % total_train_count)
-#    print("Total testing images: %d" % total_test_count)
-#    portion = 100.0*(total_train_count + 0.0) / (total_train_count + total_test_count + 0.0)
-#    print("Portion used for training: %f " % portion)
-#    print("****************************************\n\n")
-
     # Convert to Tensor
     train_imagepaths = tf.convert_to_tensor(train_imagepaths, dtype=tf.string)
     train_labels = tf.convert_to_tensor(train_labels, dtype=tf.int32)
@@ -147,26 +124,6 @@ def read_images(dataset_path, mode, batch_size):
 
     return train_image, test_image, train_label, test_label, total_train_count, total_test_count
 
-#    X_train, Y_train = tf.train.batch([train_image, train_label], batch_size=batch_size,
-#                          capacity=batch_size * 8,
-#                          num_threads=4)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -176,13 +133,12 @@ def read_images(dataset_path, mode, batch_size):
 # Set hyperparameters
 
 learning_rate = 0.0001
-num_steps = 100000
+num_steps = 5
 batch_size = 1000
 display_step = 1
 dropout = 0.5
 
 # Build the data input
-#X_train, Y_train = read_images(DATASET_PATH, MODE, batch_size)
 
 train_image, test_image, train_label, test_label, total_train_count, total_test_count = read_images(DATASET_PATH, MODE, batch_size)
 
@@ -261,7 +217,7 @@ def conv_net(x, n_classes, dropout, reuse, is_training):
             activation = tf.nn.relu)
 
 
-        flattened = tf.contrib.layers.flatten(conv8)
+        flattened = tf.contrib.layers.flatten(conv9)
 
         fc10 = tf.layers.dense(flattened, 1024)
         fc10 = tf.layers.dropout(fc10, rate=dropout, training=is_training)
@@ -291,15 +247,27 @@ train_accuracy = tf.reduce_mean(tf.cast(correct_train_pred, tf.float32))
 init = tf.global_variables_initializer()
 
 saver = tf.train.Saver()
+# Comment the next line of code for initial train sessions
+# Uncomment for subsequent
+imported_meta = tf.train.import_meta_graph("/tmp/model.ckpt.meta")
 
 
 with tf.Session() as sess:
-
     # Run the initializer
-    sess.run(init)
 
-    # Start the data queue
-    tf.train.start_queue_runners()
+
+    # Comment the next line of code for initial train sessions
+    # Uncomment for subsequent
+    imported_meta.restore(sess, tf.train.latest_checkpoint('/tmp'))
+
+    # Reverse instructions apply to this line:
+    # sess.run(init)
+
+
+
+    #Start the data queue
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(coord=coord)
 
     # Training cycle
     for step in range(1, num_steps+1):
@@ -314,9 +282,13 @@ with tf.Session() as sess:
         else:
             # Only run the optimization op (backprop)
             sess.run(train_op)
+    coord.request_stop()
+    coord.join(threads)
 
     print("Optimization Finished!")
 
-    # Save your model
-    # saver.save(sess, 'my_tf_model')
-    #saver.save(sess, '/home/mathew/models/AlexNet_model')
+    # Save model
+
+    save_path = saver.save(sess, "/tmp/model.ckpt")
+    print("Model saved in path: %s" % save_path)
+
